@@ -2,18 +2,17 @@
 
 # import the Bottle framework
 from bottle import Bottle
-
+from bottle import template
 # Create the Bottle WSGI application.
 bottle = Bottle()
 # Note: We don't need to call run() since our application is embedded within
 # the App Engine WSGI application server.
 
-
 # Define an handler for the root URL of our application.
 @bottle.route('/')
 def hello():
     """Return a friendly HTTP greeting."""
-    return 'Hello World'
+    return 'Hello World_2'
 
 
 # Define an handler for 404 errors.

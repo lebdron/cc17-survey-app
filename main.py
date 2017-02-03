@@ -3,7 +3,6 @@
 # import the Bottle framework
 from bottle import Bottle
 from bottle import template, request, route, redirect, static_file
-from google.appengine.ext import ndb
 
 import logging
 
@@ -55,7 +54,7 @@ def static(filename):
 @bottle.post('/posttest')
 def posttest():
 	logging.info("POSTTEST CALLED")
-	logging.info(request.json())
+	logging.info(request.json)
 
 # get questions
 @bottle.get('/questions')
@@ -96,7 +95,7 @@ def do_login():
 @bottle.route('/survey')
 def survey():
     if admin_flag == False:
-        survey = template('templates/index.tpl')
+        survey = template('templates/index.html')
         return survey
     else:
         redirect('/dashboard')

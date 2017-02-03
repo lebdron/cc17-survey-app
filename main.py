@@ -3,6 +3,8 @@
 # import the Bottle framework
 from bottle import Bottle
 from bottle import template, request, route, redirect, static_file
+from google.appengine.ext import ndb
+import json
 
 import logging
 
@@ -13,19 +15,16 @@ admin_flag = False
 # This is the class that describes the record in the database
 #
 class Record(ndb.Model):
-    username = ndb.StringProperty()
-    ans1 = ndb.IntegerProperty()
-    ans2 = ndb.IntegerProperty()
-    ans3 = ndb.StringProperty()
+    answers_json = ndb.StringProperty()
 
 
 # This is the function that adds a record to the database
-def add_to_database(username, id, ans1, ans2, ans3):
+def add_to_database(json_from_survey):
     record = Record()
-    record.ans1 = ans1
-    record.ans2 = ans2
-    record.ans3 = ans3
-    record.username = username
+    try:
+        record.answers_json = json_from_survey
+    except Exception as ex:
+        logging.error(ex)
     key = record.put()
     return key
 
@@ -53,8 +52,8 @@ def static(filename):
 # test post from jquery
 @bottle.post('/posttest')
 def posttest():
-	logging.info("POSTTEST CALLED")
-	logging.info(request.json)
+    add_to_database(json.dumps(request.json))
+    
 
 # get questions
 @bottle.get('/questions')

@@ -2,8 +2,10 @@
 
 # import the Bottle framework
 from bottle import Bottle
-from bottle import template, request, route, redirect
+from bottle import template, request, route, redirect, static_file
 from google.appengine.ext import ndb
+
+import logging
 
 # this variable checks if the admin logged in
 admin_flag = False
@@ -41,6 +43,25 @@ bottle = Bottle()
 # Note: We don't need to call run() since our application is embedded within
 # the App Engine WSGI application server.
 
+# serve static files (js, css)
+@bottle.route('/css/<filename:path>')
+@bottle.route('/js/<filename:path>')
+@bottle.route('/json/<filename:path>')
+def static(filename):
+    logging.info(filename)
+    return static_file(filename, root='static')
+
+# test post from jquery
+@bottle.post('/posttest')
+def posttest():
+	logging.info("POSTTEST CALLED")
+	logging.info(request.json())
+
+# get questions
+@bottle.get('/questions')
+def getQuestions():
+	return ""
+
 # Define an handler for the root URL of our application.
 @bottle.route('/login')
 def login():
@@ -75,7 +96,7 @@ def do_login():
 @bottle.route('/survey')
 def survey():
     if admin_flag == False:
-        survey = template('templates/survey.html')
+        survey = template('templates/index.tpl')
         return survey
     else:
         redirect('/dashboard')

@@ -15,23 +15,25 @@ admin_flag = False
 # This is the class that describes the record in the database
 #
 class Record(ndb.Model):
-    answers_json = ndb.StringProperty()
+    answers = ndb.JsonProperty()
 
 
 # This is the function that adds a record to the database
 def add_to_database(json_from_survey):
     record = Record()
-    try:
-        record.answers_json = json_from_survey
-    except Exception as ex:
-        logging.error(ex)
+    record.answers = json_from_survey
     key = record.put()
     return key
 
 
 def get_from_database(key):
-    record = key.get()
-    return record
+    try:
+        logging.info(key)
+        record = key.get()
+        logging.info(record)
+    except Exception as ex:
+        logging.error(ex)
+    return record.answers
 
 
 # Create the Bottle WSGI application.
@@ -46,14 +48,24 @@ bottle = Bottle()
 @bottle.route('/js/<filename:path>')
 @bottle.route('/json/<filename:path>')
 def static(filename):
-    logging.info(filename)
     return static_file(filename, root='static')
 
 # test post from jquery
 @bottle.post('/posttest')
 def posttest():
-    add_to_database(json.dumps(request.json))
-    
+    add_to_database(request.json)
+
+# get all submissions
+@bottle.route('/submissions')
+def get_submissions():
+    submissions = Record.query().fetch(keys_only=True)
+    return template('templates/submissions.html', submissions=submissions)
+
+# get single submission json
+@bottle.get('/<id>')
+def get_submission(id):
+    return get_from_database(ndb.Key('Record', int(id)))
+
 
 # get questions
 @bottle.get('/questions')

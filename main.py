@@ -145,7 +145,6 @@ def survey():
     else:
         redirect('/dashboard')
 
-
 @bottle.route('/dashboard')
 def dashboard():
     if admin_flag is True:

@@ -8,32 +8,44 @@ import json
 
 import logging
 
-# this variable checks if the admin logged in
 admin_flag = False
 
 
-# This is the class that describes the record in the database
-#
-class Record(ndb.Model):
-    answers = ndb.JsonProperty()
+class Admin(ndb.Model):
+    value_json = ndb.JsonProperty()
+
+class Answers(ndb.Model):
+    value_json = ndb.JsonProperty()
 
 
-# This is the function that adds a record to the database
-def add_to_database(json_from_survey):
-    record = Record()
-    record.answers = json_from_survey
-    key = record.put()
+class Questions(ndb.Model):
+    value_json = ndb.JsonProperty()
+
+
+def add_answer_to_database(survey_json):
+    answers = Answers()
+    answers.value_json = survey_json
+    key = answers.put()
+    return key
+
+
+def add_questions_to_database(question_json):
+    questions = Questions()
+    questions.value_json = question_json
+    key = questions.put()
+    return key
+
+
+def add_admin_to_database(admin_json):
+    admin = Admin()
+    admin.value_json = admin_json
+    key = admin.put()
     return key
 
 
 def get_from_database(key):
-    try:
-        logging.info(key)
-        record = key.get()
-        logging.info(record)
-    except Exception as ex:
-        logging.error(ex)
-    return record.answers
+    value = key.get()
+    return value
 
 
 # Create the Bottle WSGI application.
@@ -43,34 +55,54 @@ bottle = Bottle()
 # Note: We don't need to call run() since our application is embedded within
 # the App Engine WSGI application server.
 
-# serve static files (js, css)
 @bottle.route('/css/<filename:path>')
 @bottle.route('/js/<filename:path>')
 @bottle.route('/json/<filename:path>')
 def static(filename):
     return static_file(filename, root='static')
 
+
 # test post from jquery
-@bottle.post('/posttest')
-def posttest():
-    add_to_database(request.json)
+@bottle.post('/survey_add_answers')
+def add_survey_answers():
+    add_answer_to_database(request.json)
+
 
 # get all submissions
 @bottle.route('/submissions')
 def get_submissions():
-    submissions = Record.query().fetch(keys_only=True)
+    submissions = Answers.query().fetch(keys_only=True)
     return template('templates/submissions.html', submissions=submissions)
+
 
 # get single submission json
 @bottle.get('/<id>')
 def get_submission(id):
-    return get_from_database(ndb.Key('Record', int(id)))
+    answers = ndb.Key('Answers', int(id)).get()
+    return answers.value_json
 
 
-# get questions
+@bottle.post('/questions')
+def add_questions():
+    add_questions_to_database(request.json)
+
+
 @bottle.get('/questions')
-def getQuestions():
-	return ""
+def get_questions():
+    questions = Questions.query().fetch()
+    return questions[-1].value_json
+
+
+@bottle.post('/admin')
+def add_admin():
+    add_admin_to_database(request.json)
+    return ""
+
+
+@bottle.get('/set_parameters')
+def set_parameters():
+    return template('templates/set_parameters.html')
+
 
 # Define an handler for the root URL of our application.
 @bottle.route('/login')
@@ -83,18 +115,20 @@ def login():
 
 
 @bottle.post('/login')
-def do_login():
+def login():
     global admin_flag
 
     # This is the function that checks the login and password
     def check_login(username, password):
-        if username == 'user' and password == 'admin':
+        admin = Admin.query().fetch(1)
+        if username == admin.value_json['username'] and password == admin.value_json['password']:
             return True
         else:
             return False
 
-    username = request.forms.get('login')
-    password = request.forms.get('password')
+    username = request.json['login']
+    password = request.json['password']
+
     if check_login(username, password):
         admin_flag = True
         redirect('/dashboard')
@@ -110,8 +144,6 @@ def survey():
         return survey
     else:
         redirect('/dashboard')
-
-
 
 @bottle.route('/dashboard')
 def dashboard():

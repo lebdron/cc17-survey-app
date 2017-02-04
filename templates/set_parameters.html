@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>title</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+</head>
+<body>
+<div>
+    Questions
+    <input type="text" id="questions">
+    <input type="submit" id="submitQuestions">
+</div>
+<div>
+    Admin credentials
+    <input type="text" id="login">
+    <input type="text" id="pass">
+    <input type="submit" id="submitCredentials">
+</div>
+<script>
+    $("#submitQuestions").click(function () {
+        $.ajax({
+            type: "POST",
+            url: "/questions",
+            data: $("#questions").val(),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                alert(data);
+            },
+            failure: function (errMsg) {
+            }
+        });
+    });
+    $("#submitCredentials").click(function () {
+        $.ajax({
+            type: "POST",
+            url: "/admin",
+            data: JSON.stringify({username: $("#login").val(), password: $("#pass").val()}),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                alert(data);
+            },
+            failure: function (errMsg) {
+            }
+        });
+    });
+</script>
+</body>
+</html>

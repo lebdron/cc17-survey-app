@@ -112,10 +112,6 @@ def survey():
         redirect('/dashboard')
 
 
-@bottle.post('/survey')
-def survey_post():
-    pass
-
 
 @bottle.route('/dashboard')
 def dashboard():

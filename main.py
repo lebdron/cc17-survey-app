@@ -50,16 +50,19 @@ bottle = Bottle()
 def static(filename):
     return static_file(filename, root='static')
 
+
 # test post from jquery
 @bottle.post('/posttest')
 def posttest():
     add_to_database(request.json)
+
 
 # get all submissions
 @bottle.route('/submissions')
 def get_submissions():
     submissions = Record.query().fetch(keys_only=True)
     return template('templates/submissions.html', submissions=submissions)
+
 
 # get single submission json
 @bottle.get('/<id>')
@@ -70,7 +73,8 @@ def get_submission(id):
 # get questions
 @bottle.get('/questions')
 def getQuestions():
-	return ""
+    return ""
+
 
 # Define an handler for the root URL of our application.
 @bottle.route('/login')
@@ -102,6 +106,15 @@ def do_login():
         return template('<p>Login Failed</p>')
 
 
+@bottle.post('/dashboard')
+def logout():
+    global admin_flag
+    logout = request.forms.get('logout_button')
+    if not (logout is None):
+        admin_flag = False
+        redirect('/')
+
+
 @bottle.route('/')
 @bottle.route('/survey')
 def survey():
@@ -110,11 +123,6 @@ def survey():
         return survey
     else:
         redirect('/dashboard')
-
-
-@bottle.post('/survey')
-def survey_post():
-    pass
 
 
 @bottle.route('/dashboard')

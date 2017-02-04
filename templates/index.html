@@ -13,7 +13,7 @@
     var surveyJSON;
     var survey;
 
-    $.getJSON("json/questions.json", function (data) {
+    $.getJSON("questions", function (data) {
         surveyJSON = data;
     })
             .done(function () {
@@ -30,7 +30,7 @@
         // $.post( "/posttest", JSON.stringify(survey.data));
         $.ajax({
             type: "POST",
-            url: "/posttest",
+            url: "/survey_add_answers",
             data: JSON.stringify(survey.data),
             contentType: "application/json; charset=utf-8",
             dataType: "json",

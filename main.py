@@ -14,6 +14,7 @@ admin_flag = False
 class Admin(ndb.Model):
     value_json = ndb.JsonProperty()
 
+
 class Answers(ndb.Model):
     value_json = ndb.JsonProperty()
 
@@ -75,11 +76,20 @@ def get_submissions():
     return template('templates/submissions.html', submissions=submissions)
 
 
-# get single submission json
 @bottle.get('/<id>')
 def get_submission(id):
     answers = ndb.Key('Answers', int(id)).get()
     return answers.value_json
+
+
+@bottle.get('/answers')
+def get_submission():
+    answers = Answers.query().fetch()
+    result = {}
+    for answer in answers:
+        result[answer.key.id()] = answer.value_json
+    logging.error(result)
+    return result
 
 
 @bottle.post('/questions')
@@ -96,11 +106,11 @@ def get_questions():
 @bottle.post('/admin')
 def add_admin():
     add_admin_to_database(request.json)
-    return ""
 
 
 @bottle.get('/set_parameters')
 def set_parameters():
+    redirect_back()
     return template('templates/set_parameters.html')
 
 
@@ -118,16 +128,15 @@ def login():
 def login():
     global admin_flag
 
-    # This is the function that checks the login and password
     def check_login(username, password):
-        admin = Admin.query().fetch(1)
+        admin = Admin.query().fetch()[0]
         if username == admin.value_json['username'] and password == admin.value_json['password']:
             return True
         else:
             return False
 
-    username = request.json['login']
-    password = request.json['password']
+    username = request.forms.get('login')
+    password = request.forms.get('password')
 
     if check_login(username, password):
         admin_flag = True
@@ -145,12 +154,27 @@ def survey():
     else:
         redirect('/dashboard')
 
+
 @bottle.route('/dashboard')
 def dashboard():
     if admin_flag is True:
         dashboard = template('templates/dashboard.html')
         return dashboard
     else:
+        redirect('/login')
+
+
+@bottle.post('/dashboard')
+def logout():
+    global admin_flag
+    logout = request.forms.get('logout_button')
+    if not (logout is None):
+        admin_flag = False
+        redirect('/')
+
+
+def redirect_back():
+    if admin_flag == False:
         redirect('/login')
 
 

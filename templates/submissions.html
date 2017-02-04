@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Submissions</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="js/survey.jquery.min.js"></script>
+    <link href="css/survey.css" type="text/css" rel="stylesheet"/>
+  </head>
+  <body>
+    <ul>
+      % for submission in submissions:
+        <li><a href="#" onclick="surveyRefresh({{ submission.id() }})">{{ submission.id() }}</a></li>
+      % end
+    </ul>
+    <hr>
+    <div id="surveyContainer"></div>
+    <script>
+        var surveyJSON;
+        var survey;
+        var dataJSON;
+
+        $.getJSON("json/questions.json", function (data) {
+            surveyJSON = data;
+        })
+        
+        function surveyRefresh(id){
+        $.getJSON("/" + id, function (data){
+            dataJSON = data;
+            }).done(function () {
+                    survey = new Survey.Model(surveyJSON);
+                    survey.mode = "display";
+                    survey.data = dataJSON;
+                    survey.showNavigationButtons = false;
+                    $("#surveyContainer").Survey({
+                        model: survey
+                    });
+                });
+        }
+
+
+    </script>
+  </body>
+</html>

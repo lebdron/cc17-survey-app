@@ -67,7 +67,8 @@ def compute_average_scores():
                     count += 1
         average = average / count
         average_values.append((rq, average))
-    #TODO send the result
+    return average_values
+
 
 # Create the Bottle WSGI application.
 bottle = Bottle()
@@ -178,7 +179,9 @@ def survey():
 @bottle.route('/dashboard')
 def dashboard():
     if admin_flag is True:
-        dashboard = template('templates/dashboard.html')
+        scores = compute_average_scores()
+        dashboard = template('templates/dashboard.html', scores=scores)
+        # TODO ensure that form update button updates scores too
         return dashboard
     else:
         redirect('/login')

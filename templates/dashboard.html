@@ -33,6 +33,14 @@
             </tr>
             </tbody>
         </table>
+
+        <p>Average Scores</p>
+        <ul>
+            % for score in scores:
+            <li>{{score[0]}} -> {{score[1]}}</li>
+            % end
+        </ul>
+
         <p align="center"><font face="Lucida Sans Unicode, Lucida Grande, sans-serif"><input name="update_button"
                                                                                              type="button"
                                                                                              value="Update"></font></p>

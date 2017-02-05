@@ -18,44 +18,56 @@
 
     $("#rusButton").click(function () {
         localStorage.setItem('language', 'rus');
+        render();
     });
 
     $("#engButton").click(function () {
         localStorage.setItem('language', 'eng');
+        render();
     });
 
+    render();
 
-    $.getJSON("/questions_in_russian", function (data) {
-        surveyJSON = data;
-    })
-            .done(function () {
-                survey = new Survey.Model(surveyJSON);
-                $("#surveyContainer").Survey({
-                    model: survey,
-                    onComplete: sendDataToServer
-                });
-                $(document).ready( function() {
-                    $("input[type='text'], textarea").attr('spellcheck',true);
+    function render() {
+        var language = localStorage.getItem('language');
+        var urlForQuestionsWithLanguage = "/questions_in_english";
+
+        if (language == "rus") {
+            urlForQuestionsWithLanguage = "/questions_in_russian";
+        }
+
+        $.getJSON(urlForQuestionsWithLanguage, function (data) {
+            surveyJSON = data;
+        })
+                .done(function () {
+                    survey = new Survey.Model(surveyJSON);
+                    $("#surveyContainer").Survey({
+                        model: survey,
+                        onComplete: sendDataToServer
+                    });
+                    $(document).ready(function () {
+                        $("input[type='text'], textarea").attr('spellcheck', true);
+                    });
+
                 });
 
+        function sendDataToServer(survey) {
+            //send Ajax request to your web server.
+            //alert("The results are:" + JSON.stringify(survey.data));
+            // $.post( "/posttest", JSON.stringify(survey.data));
+            $.ajax({
+                type: "POST",
+                url: "/survey_add_answers",
+                data: JSON.stringify(survey.data),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    alert(data);
+                },
+                failure: function (errMsg) {
+                }
             });
-
-    function sendDataToServer(survey) {
-        //send Ajax request to your web server.
-        //alert("The results are:" + JSON.stringify(survey.data));
-        // $.post( "/posttest", JSON.stringify(survey.data));
-        $.ajax({
-            type: "POST",
-            url: "/survey_add_answers",
-            data: JSON.stringify(survey.data),
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            success: function (data) {
-                alert(data);
-            },
-            failure: function (errMsg) {
-            }
-        });
+        }
     }
 
 </script>

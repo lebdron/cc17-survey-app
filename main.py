@@ -206,3 +206,4 @@ def redirect_back():
 def error_404(error):
     """Return a custom 404 error."""
     return 'Sorry, Nothing at this URL.'
+

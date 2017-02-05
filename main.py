@@ -59,27 +59,6 @@ def get_from_database(key):
     value = key.get()
     return value
 
-
-def compute_average_scores():
-    answers = Answers.query().fetch()
-    questions = Questions.query().fetch()
-    rating_questions = []
-    for question in questions.value_json:
-        if question['type'] == 'rating':
-            rating_questions.append(question['name'])
-    average_values = []
-    for rq in rating_questions:
-        average = 0
-        count = 0
-        for answer in answers.value_json:
-            for key, value in answer:
-                if key == rq:
-                    average += value
-                    count += 1
-        average = average / count
-        average_values.append((rq, average))
-    #TODO send the result
-
 # Create the Bottle WSGI application.
 bottle = Bottle()
 
@@ -167,6 +146,28 @@ def login():
         redirect('/dashboard')
 
 
+# @bottle.post('/dashboard')
+def compute_average_scores():
+    answers = Answers.query().fetch()
+    questions = QuestionsInEnglish.query().fetch()
+    rating_questions = []
+    for question in questions.value_json:
+        if question['type'] == 'rating':
+            rating_questions.append(question['name'])
+    average_values = []
+    for rq in rating_questions:
+        average = 0
+        count = 0
+        for answer in answers.value_json:
+            for key, value in answer:
+                if key == rq:
+                    average += value
+                    count += 1
+        average = average / count
+        average_values.append((rq, average))
+    #TODO send the result
+
+
 @bottle.post('/login')
 def login():
     global admin_flag
@@ -198,7 +199,7 @@ def survey():
         redirect('/dashboard')
 
 
-@bottle.route('/dashboard')
+@bottle.post('/dashboard')
 def dashboard():
     if admin_flag is True:
         dashboard = template('templates/dashboard.html')
@@ -207,13 +208,11 @@ def dashboard():
         redirect('/login')
 
 
-@bottle.post('/dashboard')
+@bottle.post('/logout')
 def logout():
     global admin_flag
-    logout = request.forms.get('logout_button')
     if not (logout is None):
         admin_flag = False
-        redirect('/')
 
 
 def redirect_back():
@@ -226,4 +225,6 @@ def redirect_back():
 def error_404(error):
     """Return a custom 404 error."""
     return 'Sorry, Nothing at this URL.'
+
+
 

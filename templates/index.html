@@ -34,6 +34,10 @@
                     model: survey,
                     onComplete: sendDataToServer
                 });
+                $(document).ready( function() {
+                    $("input[type='text'], textarea").attr('spellcheck',true);
+                });
+
             });
 
     function sendDataToServer(survey) {

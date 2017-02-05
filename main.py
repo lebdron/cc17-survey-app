@@ -19,7 +19,11 @@ class Answers(ndb.Model):
     value_json = ndb.JsonProperty()
 
 
-class Questions(ndb.Model):
+class QuestionsInRussian(ndb.Model):
+    value_json = ndb.JsonProperty()
+
+
+class QuestionsInEnglish(ndb.Model):
     value_json = ndb.JsonProperty()
 
 
@@ -30,10 +34,17 @@ def add_answer_to_database(survey_json):
     return key
 
 
-def add_questions_to_database(question_json):
-    questions = Questions()
-    questions.value_json = question_json
-    key = questions.put()
+def add_questions_in_russian_to_database(question_json):
+    questions_in_russian = QuestionsInRussian()
+    questions_in_russian.value_json = question_json
+    key = questions_in_russian.put()
+    return key
+
+
+def add_questions_in_english_to_database(question_json):
+    questions_in_english = QuestionsInEnglish()
+    questions_in_english.value_json = question_json
+    key = questions_in_english.put()
     return key
 
 
@@ -113,15 +124,28 @@ def get_submission():
     return result
 
 
-@bottle.post('/questions')
-def add_questions():
-    add_questions_to_database(request.json)
+@bottle.post('/questions_in_russian')
+def add_questions_in_russian():
+    logging.error(request)
+    logging.error(request.json)
+    add_questions_in_russian_to_database(request.json)
 
 
-@bottle.get('/questions')
-def get_questions():
-    questions = Questions.query().fetch()
-    return questions[-1].value_json
+@bottle.post('/questions_in_english')
+def add_questions_in_english():
+    add_questions_in_english_to_database(request.json)
+
+
+@bottle.get('/questions_in_russian')
+def get_questions_in_russian():
+    questions_in_russian = QuestionsInRussian.query().fetch()
+    return questions_in_russian[-1].value_json
+
+
+@bottle.get('/questions_in_english')
+def get_questions_in_english():
+    questions_in_english = QuestionsInEnglish.query().fetch()
+    return questions_in_english[-1].value_json
 
 
 @bottle.post('/admin')
@@ -131,7 +155,6 @@ def add_admin():
 
 @bottle.get('/set_parameters')
 def set_parameters():
-    redirect_back()
     return template('templates/set_parameters.html')
 
 
@@ -143,6 +166,28 @@ def login():
         return login
     else:
         redirect('/dashboard')
+
+
+# @bottle.post('/dashboard')
+def compute_average_scores():
+    answers = Answers.query().fetch()
+    questions = QuestionsInEnglish.query().fetch()
+    rating_questions = []
+    for question in questions.value_json:
+        if question['type'] == 'rating':
+            rating_questions.append(question['name'])
+    average_values = []
+    for rq in rating_questions:
+        average = 0
+        count = 0
+        for answer in answers.value_json:
+            for key, value in answer:
+                if key == rq:
+                    average += value
+                    count += 1
+        average = average / count
+        average_values.append((rq, average))
+    #TODO send the result
 
 
 @bottle.post('/login')
@@ -176,7 +221,7 @@ def survey():
         redirect('/dashboard')
 
 
-@bottle.route('/dashboard')
+@bottle.post('/dashboard')
 def dashboard():
     if admin_flag is True:
         scores = compute_average_scores()
@@ -187,13 +232,11 @@ def dashboard():
         redirect('/login')
 
 
-@bottle.post('/dashboard')
+@bottle.post('/logout')
 def logout():
     global admin_flag
-    logout = request.forms.get('logout_button')
     if not (logout is None):
         admin_flag = False
-        redirect('/')
 
 
 def redirect_back():
@@ -206,3 +249,6 @@ def redirect_back():
 def error_404(error):
     """Return a custom 404 error."""
     return 'Sorry, Nothing at this URL.'
+
+
+

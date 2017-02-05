@@ -8,39 +8,68 @@
     <link href="css/survey.css" type="text/css" rel="stylesheet"/>
 </head>
 <body>
+<button id="rusButton"> РУССКИЙ</button>
+<button id="engButton">ENGLISH</button>
 <div id="surveyContainer"></div>
+
 <script>
     var surveyJSON;
     var survey;
 
-    $.getJSON("questions", function (data) {
-        surveyJSON = data;
-    })
-            .done(function () {
-                survey = new Survey.Model(surveyJSON);
-                $("#surveyContainer").Survey({
-                    model: survey,
-                    onComplete: sendDataToServer
-                });
-            });
+    $("#rusButton").click(function () {
+        localStorage.setItem('language', 'rus');
+        render();
+    });
 
-    function sendDataToServer(survey) {
-        //send Ajax request to your web server.
-        //alert("The results are:" + JSON.stringify(survey.data));
-        // $.post( "/posttest", JSON.stringify(survey.data));
-        $.ajax({
-            type: "POST",
-            url: "/survey_add_answers",
-            data: JSON.stringify(survey.data),
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            success: function (data) {
-                alert(data);
-            },
-            failure: function (errMsg) {
-            }
-        });
+    $("#engButton").click(function () {
+        localStorage.setItem('language', 'eng');
+        render();
+    });
+
+    render();
+
+    function render() {
+        var language = localStorage.getItem('language');
+        var urlForQuestionsWithLanguage = "/questions_in_english";
+
+        if (language == "rus") {
+            urlForQuestionsWithLanguage = "/questions_in_russian";
+        }
+
+        $.getJSON(urlForQuestionsWithLanguage, function (data) {
+            surveyJSON = data;
+        })
+                .done(function () {
+                    survey = new Survey.Model(surveyJSON);
+                    $("#surveyContainer").Survey({
+                        model: survey,
+                        onComplete: sendDataToServer
+                    });
+                    $(document).ready(function () {
+                        $("input[type='text'], textarea").attr('spellcheck', true);
+                    });
+
+                });
+
+        function sendDataToServer(survey) {
+            //send Ajax request to your web server.
+            //alert("The results are:" + JSON.stringify(survey.data));
+            // $.post( "/posttest", JSON.stringify(survey.data));
+            $.ajax({
+                type: "POST",
+                url: "/survey_add_answers",
+                data: JSON.stringify(survey.data),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    alert(data);
+                },
+                failure: function (errMsg) {
+                }
+            });
+        }
     }
+
 
 </script>
 </body>

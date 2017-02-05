@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <meta charset="UTF-8">
     <title></title>
 </head>
@@ -101,5 +102,135 @@
 
     </div>
 </form>
+
+
+<div id="chart_div">
+</div>
+<div>
+    <button id="logoutButton">Logout</button>
+</div>
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+
+    google.charts.load('current', {
+        packages: ['corechart', 'bar']
+    });
+    google.charts.setOnLoadCallback(getData);
+    //Функция принимает JSON параметры по примеру ниже
+    //При необходимости можно их раскомментировать и посмотреть, что получается
+
+    var q;
+    var a;
+
+    function getData()
+    {
+        $.ajax({
+            type: "GET",
+            url: "/questions_in_english",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                q = data;
+                $.ajax({
+                    type: "GET",
+                    url: "/answers",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (data) {
+                        a = data;
+                        drawMultSeries(q, a);
+                    }
+                });
+            }
+        });
+    }
+
+    getData();
+
+    function drawMultSeries(q, a) {
+
+        var names_of_questions = [];
+
+        for (var i = 0; i < q.pages[0].questions.length; i++) {
+            if (q.pages[0].questions[i].type == "radiogroup") {
+                names_of_questions.push(q.pages[0].questions[i].name);
+            }
+        }
+
+        var questions_results = [];
+
+
+        for (var i = 0; i < names_of_questions.length; i++) {
+            questions_results.push([
+                [names_of_questions[i], 'count']
+            ]);
+        }
+
+
+        function inc_question_value(question_name, answer, question_results) {
+            function find_answer_count_pair(data, answer) {
+                for (var i = 0; i < data.length; i++) {
+                    var flag = false;
+                    if (data[i][0] == answer) {
+                        data[i][1] = data[i][1] + 1;
+                        flag = true;
+                        break;
+                    }
+                }
+                if (flag == false) {
+                    data.push([answer, 1]);
+                }
+            }
+
+            for (var i = 0; i < question_results.length; i++) {
+                if (question_results[i][0][0] == question_name) {
+                    find_answer_count_pair(question_results[i], answer);
+                }
+            }
+        }
+
+        for (var id in a) {
+            for (var question in a[id]) {
+                if (names_of_questions.indexOf(question) != -1) {
+                    inc_question_value(question, a[id][question], questions_results);
+                }
+            }
+        }
+        //
+        // В части с визуализацией нужно указать нужный div
+        for (var i = 0; i < questions_results.length; i++) {
+            var data = google.visualization.arrayToDataTable(questions_results[i]);
+
+            var options = {
+                title: 'Answer Distribution',
+                chartArea: {
+                    width: '50%'
+                },
+                hAxis: {
+                    title: 'Count',
+                    minValue: 0
+                },
+                vAxis: {
+                    title: 'Number of question'
+                }
+            };
+
+            var chart = new google.visualization.BarChart(document.getElementById('chart_div'));
+            chart.draw(data, options);
+        }
+    }
+
+    $("#logoutButton").click(function () {
+        $.ajax({
+            type: "POST",
+            url: "/logout",
+            success:function(data) {
+                location.reload();
+            }
+        });
+    });
+</script>
+
 </body>
 </html>

@@ -60,27 +60,6 @@ def get_from_database(key):
     return value
 
 
-def compute_average_scores():
-    answers = Answers.query().fetch()
-    questions = Questions.query().fetch()
-    rating_questions = []
-    for question in questions.value_json:
-        if question['type'] == 'rating':
-            rating_questions.append(question['name'])
-    average_values = []
-    for rq in rating_questions:
-        average = 0
-        count = 0
-        for answer in answers.value_json:
-            for key, value in answer:
-                if key == rq:
-                    average += value
-                    count += 1
-        average = average / count
-        average_values.append((rq, average))
-    return average_values
-
-
 # Create the Bottle WSGI application.
 bottle = Bottle()
 
@@ -120,14 +99,11 @@ def get_submission():
     result = {}
     for answer in answers:
         result[answer.key.id()] = answer.value_json
-    logging.error(result)
     return result
 
 
 @bottle.post('/questions_in_russian')
 def add_questions_in_russian():
-    logging.error(request)
-    logging.error(request.json)
     add_questions_in_russian_to_database(request.json)
 
 
@@ -168,26 +144,26 @@ def login():
         redirect('/dashboard')
 
 
-# @bottle.post('/dashboard')
 def compute_average_scores():
     answers = Answers.query().fetch()
     questions = QuestionsInEnglish.query().fetch()
     rating_questions = []
-    for question in questions.value_json:
+    for question in questions[0].value_json['pages'][0]['questions']:
         if question['type'] == 'rating':
             rating_questions.append(question['name'])
     average_values = []
     for rq in rating_questions:
         average = 0
         count = 0
-        for answer in answers.value_json:
+        # TODO: бля ну сделайте чтобы работало
+        for answer in answers:
             for key, value in answer:
                 if key == rq:
                     average += value
                     count += 1
         average = average / count
         average_values.append((rq, average))
-    #TODO send the result
+    return average_values
 
 
 @bottle.post('/login')
@@ -221,12 +197,12 @@ def survey():
         redirect('/dashboard')
 
 
-@bottle.post('/dashboard')
+@bottle.route('/dashboard')
 def dashboard():
     if admin_flag is True:
         scores = compute_average_scores()
+        logging.error(scores)
         dashboard = template('templates/dashboard.html', scores=scores)
-        # TODO ensure that form update button updates scores too
         return dashboard
     else:
         redirect('/login')

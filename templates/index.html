@@ -8,12 +8,24 @@
     <link href="css/survey.css" type="text/css" rel="stylesheet"/>
 </head>
 <body>
+<button id="rusButton"> РУССКИЙ</button>
+<button id="engButton">ENGLISH</button>
 <div id="surveyContainer"></div>
+
 <script>
     var surveyJSON;
     var survey;
 
-    $.getJSON("questions", function (data) {
+    $("#rusButton").click(function () {
+        localStorage.setItem('language', 'rus');
+    });
+
+    $("#engButton").click(function () {
+        localStorage.setItem('language', 'eng');
+    });
+
+
+    $.getJSON("/questions_in_russian", function (data) {
         surveyJSON = data;
     })
             .done(function () {

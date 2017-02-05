@@ -59,6 +59,28 @@ def get_from_database(key):
     value = key.get()
     return value
 
+
+def compute_average_scores():
+    answers = Answers.query().fetch()
+    questions = Questions.query().fetch()
+    rating_questions = []
+    for question in questions.value_json:
+        if question['type'] == 'rating':
+            rating_questions.append(question['name'])
+    average_values = []
+    for rq in rating_questions:
+        average = 0
+        count = 0
+        for answer in answers.value_json:
+            for key, value in answer:
+                if key == rq:
+                    average += value
+                    count += 1
+        average = average / count
+        average_values.append((rq, average))
+    return average_values
+
+
 # Create the Bottle WSGI application.
 bottle = Bottle()
 
@@ -202,7 +224,9 @@ def survey():
 @bottle.post('/dashboard')
 def dashboard():
     if admin_flag is True:
-        dashboard = template('templates/dashboard.html')
+        scores = compute_average_scores()
+        dashboard = template('templates/dashboard.html', scores=scores)
+        # TODO ensure that form update button updates scores too
         return dashboard
     else:
         redirect('/login')

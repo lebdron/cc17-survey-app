@@ -10,21 +10,47 @@
   <body>
     <ul>
       % for submission in submissions:
-        <li><a href="#" onclick="surveyRefresh({{ submission.id() }})">{{ submission.id() }}</a></li>
+        <li><a href="#" class="submission">{{ submission.id() }}</a></li>
       % end
     </ul>
-    <hr>
+    <hr>    
+    <button id="rusButton">РУССКИЙ</button>
+    <button id="engButton">ENGLISH</button>
     <div id="surveyContainer"></div>
     <script>
         var surveyJSON;
         var survey;
         var dataJSON;
+        var answersID;
+        
+        $("#rusButton").click(function () {
+            localStorage.setItem('language', 'rus');
+            if (answersID != null){
+                surveyRefresh(answersID);
+            }
+        });
+        $("#engButton").click(function () {
+            localStorage.setItem('language', 'eng');
+            if (answersID != null){
+                surveyRefresh(answersID);
+            }
+        });
+        $(".submission").click(function(){
+            surveyRefresh($(this).text());
+        });
 
-        $.getJSON("questions", function (data) {
+        function surveyRefresh(id){
+        answersID = id;
+        var language = localStorage.getItem('language');
+        var urlForQuestionsWithLanguage = "/questions_in_english";
+        if (language == "rus") {
+            urlForQuestionsWithLanguage = "/questions_in_russian";
+        }
+
+        $.getJSON(urlForQuestionsWithLanguage, function (data) {
             surveyJSON = data;
         })
-        
-        function surveyRefresh(id){
+        .done(function(){
         $.getJSON("/" + id, function (data){
             dataJSON = data;
             }).done(function () {
@@ -36,6 +62,8 @@
                         model: survey
                     });
                 });
+        });
+        
         }
 
 

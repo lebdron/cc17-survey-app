@@ -151,9 +151,7 @@ def compute_average_scores():
     for question in questions[0].value_json['pages'][0]['questions']:
         if question['type'] == 'rating':
             rating_questions.append(question['name'])
-    logging.info(len(rating_questions))
     average_values = []
-    logging.info("values created")
     for rq in rating_questions:
         average = 0
         count = 0
@@ -162,7 +160,6 @@ def compute_average_scores():
             count += 1
         average = average / count
         average_values.append((rq, average))
-    logging.info("function done")
     return average_values
 
 

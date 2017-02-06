@@ -158,7 +158,7 @@ def compute_average_scores():
         for answer in answers:
             average += int(answer.value_json[rq])
             count += 1
-        average = (average / count)
+        average = average / count
         average_values.append((rq, average))
     return average_values
 

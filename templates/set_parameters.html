@@ -30,14 +30,9 @@
             url: "/questions_in_russian",
             data: $("#questionsInRussian").val(),
             contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            success: function (data) {
-                alert(data);
-            },
-            failure: function (errMsg) {
-
-            }
+            dataType: "json"
         });
+        alert("Done");
     });
     $("#submitQuestionsInEnglish").click(function () {
         $.ajax({
@@ -45,13 +40,9 @@
             url: "/questions_in_english",
             data: $("#questionsInEnglish").val(),
             contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            success: function (data) {
-                alert(data);
-            },
-            failure: function (errMsg) {
-            }
-        });
+            dataType: "json"
+        }); 
+        alert("Done");
     });
     $("#submitCredentials").click(function () {
         $.ajax({
@@ -59,13 +50,9 @@
             url: "/admin",
             data: JSON.stringify({username: $("#login").val(), password: $("#pass").val()}),
             contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            success: function (data) {
-                alert(data);
-            },
-            failure: function (errMsg) {
-            }
+            dataType: "json"
         });
+        alert("Done");
     });
 </script>
 </body>

@@ -35,6 +35,7 @@ def add_answer_to_database(survey_json):
 
 
 def add_questions_in_russian_to_database(question_json):
+    ndb.delete_multi(QuestionsInRussian.query().fetch(keys_only=True))
     questions_in_russian = QuestionsInRussian()
     questions_in_russian.value_json = question_json
     key = questions_in_russian.put()
@@ -42,6 +43,7 @@ def add_questions_in_russian_to_database(question_json):
 
 
 def add_questions_in_english_to_database(question_json):
+    ndb.delete_multi(QuestionsInEnglish.query().fetch(keys_only=True))
     questions_in_english = QuestionsInEnglish()
     questions_in_english.value_json = question_json
     key = questions_in_english.put()
@@ -49,6 +51,7 @@ def add_questions_in_english_to_database(question_json):
 
 
 def add_admin_to_database(admin_json):
+    ndb.delete_multi(Admin.query().fetch(keys_only=True))
     admin = Admin()
     admin.value_json = admin_json
     key = admin.put()

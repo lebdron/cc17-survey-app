@@ -153,7 +153,7 @@ def compute_average_scores():
             rating_questions.append(question['name'])
     average_values = []
     for rq in rating_questions:
-        average = 0
+        average = 0.0
         count = 0
         for answer in answers:
             average += int(answer.value_json[rq])

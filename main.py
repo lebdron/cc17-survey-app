@@ -160,10 +160,6 @@ def compute_average_scores():
         for answer in answers:
             average += int(answer.value_json[rq])
             count += 1
-            #for key, value in answer.value_json:
-            #    if key == rq:
-            #       average += int(value)
-            #        count += 1
         average = average / count
         average_values.append((rq, average))
     logging.info("function done")

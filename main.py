@@ -35,6 +35,7 @@ def add_answer_to_database(survey_json):
 
 
 def add_questions_in_russian_to_database(question_json):
+    ndb.delete_multi(Answers.query().fetch(keys_only=True))
     ndb.delete_multi(QuestionsInRussian.query().fetch(keys_only=True))
     questions_in_russian = QuestionsInRussian()
     questions_in_russian.value_json = question_json
@@ -43,6 +44,7 @@ def add_questions_in_russian_to_database(question_json):
 
 
 def add_questions_in_english_to_database(question_json):
+    ndb.delete_multi(Answers.query().fetch(keys_only=True))
     ndb.delete_multi(QuestionsInEnglish.query().fetch(keys_only=True))
     questions_in_english = QuestionsInEnglish()
     questions_in_english.value_json = question_json
@@ -190,11 +192,11 @@ def login():
 @bottle.route('/')
 @bottle.route('/survey')
 def survey():
-    if admin_flag == False:
-        survey = template('templates/index.html')
-        return survey
-    else:
-        redirect('/dashboard')
+#    if admin_flag == False:
+    survey = template('templates/index.html')
+    return survey
+#    else:
+#        redirect('/dashboard')
 
 
 @bottle.route('/dashboard')
